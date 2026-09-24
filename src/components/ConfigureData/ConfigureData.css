@@ -1,0 +1,218 @@
+  .form-select{
+    width:20%!important
+  }
+  
+  .my-4 {
+    width: 45% !important
+  }
+  
+  .card-techniques{
+    margin-top: 12px;
+    border:0px solid;
+    border-radius: 12px !important;
+    border-width: 0px !important;
+  }
+  
+  .card-techniques:hover{
+    border:10px solid;
+    border-radius: 16px !important;
+    border-width: 2px !important;
+  }
+  
+  
+  .col-techniques .card-header{
+    background-color: #E0E0E0 !important;
+  }
+  
+  .btn-outline-primary{
+    margin-right: 2rem;
+    margin-bottom: 2rem;
+  }
+  
+  .containerTechnique {
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: right !important;
+  }
+  
+  .cardTechnique {
+    transition: all 0.3s ease;
+    overflow: hidden;
+    cursor: pointer;
+  }
+  
+  .cardTechnique img {
+    object-fit: cover;
+  }
+  
+  .containerTechnique h6 {
+    font-weight: 500;
+    margin-top: 5px !important;
+    margin-bottom: 5px !important;
+    align-items: center;
+    font-size: 0.8em !important;
+  }
+  
+  .listgroup{
+    width:40rem !important;
+  }
+  
+  .list-group-item.active {
+    background-color: #4e73df!important;
+    border-color: #4e73df !important;
+  }
+  
+  .btn-primary {
+    color: #fff;
+    background-color:  #4e73df !important;
+    border-color:  #4e73df !important;
+    accent-color:  #4e73df !important;
+  }
+  
+  .form-check-input:checked {
+    background-color:#4e73df !important;
+    border-color: #4e73df !important;
+    accent-color:  #4e73df !important;
+  }
+  
+  .form-check-input:focus {
+    border-color: #4e73df !important;
+    accent-color:  #4e73df !important;
+  }
+
+  .form-check-input {
+    border-color:  #4e73df !important;
+    accent-color:  #4e73df !important;
+  }
+  
+  .arrowLeft{
+    background-color: transparent !important;
+    color:#000000!important;
+    border: none !important;
+    width: 18px!important;
+  }
+  
+  .arrowLeft:focus{
+    box-shadow: 0 0 0 0rem rgba(49, 132, 253, .5) !important;
+  }
+  
+  .arrowLeft svg{
+    /*font-size: 18px!important;*/
+    opacity: 0.5;
+  }
+  
+  
+  .iconsList{
+    background-color: transparent !important;
+    color:#000000!important;
+    border: none !important;
+    width: 18px!important;
+  }
+  
+  .iconsList:focus{
+    box-shadow: 0 0 0 0rem rgba(49, 132, 253, .5) !important;
+  }
+  
+  .iconsList svg{
+    /*font-size: 18px!important;*/
+    opacity: 0.5;
+  }
+  
+  .active {
+    background: transparent; 
+    border-radius: 9999px; 
+    color:  #4e73df;
+  }
+  
+  .toggleButton{
+    background-color: transparent !important;
+    color:#000000!important;
+    border: none !important;
+    width: 40px!important;
+    height: 40px!important;
+    position: absolute;
+    right: 5px !important;
+    margin-bottom: 0px!important
+  }
+  
+  .toggleButton:active{
+    box-shadow: 0 0 0 0rem rgba(49, 132, 253, .5) !important;
+  
+  }
+  
+  .toggleButton:focus{
+    box-shadow: 0 0 0 0rem rgba(49, 132, 253, .5) !important;
+  
+  }
+  
+  .toggleButton svg{
+    /*font-size: 25px!important;*/
+    padding: 0px !important;
+    opacity: 0.5;
+  }
+  
+  .arrowButton{
+    background-color: transparent !important;
+    color:#000000!important;
+    border: none !important;
+    width: 40px!important;
+    height: 40px!important;
+    position: absolute;
+    left: 5px !important;
+    margin-bottom: 0px!important
+  }
+  
+  .arrowButton:active{
+    box-shadow: 0 0 0 0rem rgba(49, 132, 253, .5) !important;
+  
+  }
+  
+  .arrowButton:focus{
+    box-shadow: 0 0 0 0rem rgba(49, 132, 253, .5) !important;
+  
+  }
+  
+  .arrowButton svg{
+    /*font-size: 25px!important;*/
+    padding: 0px !important;
+    opacity: 0.5;
+  }
+  
+  .displayBlock{
+    display: block !important
+  }
+  
+  .displayFlex{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: left !important;
+  }
+  
+  .label{
+    border-bottom: 1px solid rgba(0, 0, 0, .125);
+  }
+  
+  .dropdownOption{
+    width: 100%
+  }
+  
+  option{
+      display: block;
+      border-radius: 0rem !important;
+  }
+  .form-select-option {
+      width: 20% !important;
+  }
+  
+  text{
+    /*font-size: 9px !important;*/
+    color:#000000!important;
+    z-index: 1000 !important;
+  }
+
+  
+  .colorprogress{
+    background-color: #ff00ff;
+  }
+  

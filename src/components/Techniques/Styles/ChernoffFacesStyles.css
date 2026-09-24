@@ -1,0 +1,68 @@
+.chernoff{
+    fill: none;
+    stroke: #000;
+}
+
+#btn-axisx{
+  font-size:12px;
+  margin-left: 0px !important;
+  border-radius: 2px;
+  border: 1px solid rgba(0, 0, 0, .25) !important;
+  background-color: white!important;
+  color: rgb(54, 54, 56);
+}
+
+#btn-axisx:hover {
+  border: 1px solid rgba(0, 0, 0, .25) !important;
+  box-shadow: 0 0 0 .25rem rgba(33, 37, 41, .25) !important;
+}
+
+#btn-axisx:active {
+  border: 1px solid rgba(0, 0, 0, .25)!important;
+  box-shadow: 0 0 0 .25rem rgba(33, 37, 41, .25) !important;
+}
+
+#btn-axisx:focus {
+  border: 1px solid rgba(0, 0, 0, .25)!important;
+  box-shadow: 0 0 0 .25rem rgba(33, 37, 41, .25) !important;
+}
+
+#btn-axisy{
+  font-size:12px;
+  margin-left: 0px !important;
+  border-radius: 2px;
+  border: 1px solid rgba(0, 0, 0, .25) !important;
+  background-color: white!important;
+  color: rgb(54, 54, 56);
+}
+
+#btn-axisy:hover {
+  border: 1px solid rgba(0, 0, 0, .25) !important;
+  box-shadow: 0 0 0 .25rem rgba(33, 37, 41, .25) !important;
+}
+
+#btn-axisy:active {
+  border: 1px solid rgba(0, 0, 0, .25)!important;
+  box-shadow: 0 0 0 .25rem rgba(33, 37, 41, .25) !important;
+}
+
+#btn-axisy:focus {
+  border: 1px solid rgba(0, 0, 0, .25)!important;
+  box-shadow: 0 0 0 .25rem rgba(33, 37, 41, .25) !important;
+}
+
+.line {
+  stroke: black;
+  stroke-width: 2;
+  fill: none;
+}
+.circle {
+  fill: black;
+}
+
+.dropdown-option{
+  display: "flex";
+  position: relative !important;
+}
+
+

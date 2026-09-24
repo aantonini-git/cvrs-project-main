@@ -1,0 +1,114 @@
+.dropdown-content{
+  width: 200px;
+}
+
+#btn-axisx{
+  font-size:10px;
+  margin-left: 0px !important;
+  border-radius: 2px;
+  border-color: rgba(54, 54, 56, 0.2);
+  background-color: white;
+  color: rgb(54, 54, 56);
+}
+
+#btn-axisx:hover {
+  border-color: rgba(54, 54, 56, 0.2);
+  box-shadow: 0 0 0 .25rem rgba(33, 37, 41, .25) !important;
+}
+
+#btn-axisx:active {
+  border-color: rgba(54, 54, 56, 0.2);
+  box-shadow: 0 0 0 .25rem rgba(33, 37, 41, .25) !important;
+}
+
+#btn-axisx:focus {
+  border-color: rgba(54, 54, 56, 0.2);
+  box-shadow: 0 0 0 .25rem rgba(33, 37, 41, .25) !important;
+}
+
+#btn-axisy{
+  font-size:10px;
+  margin-left: 0px !important;
+  border-radius: 2px;
+  border-color: rgba(54, 54, 56, 0.2);
+  background-color: white;
+  color: rgb(54, 54, 56);
+}
+
+#btn-axisy:hover {
+  border-color: rgba(54, 54, 56, 0.2);
+  box-shadow: 0 0 0 .25rem rgba(33, 37, 41, .25) !important;
+}
+
+#btn-axisy:active {
+  border-color: rgba(54, 54, 56, 0.2);
+  box-shadow: 0 0 0 .25rem rgba(33, 37, 41, .25) !important;
+}
+
+#btn-axisy:focus {
+  border-color: rgba(54, 54, 56, 0.2);
+  box-shadow: 0 0 0 .25rem rgba(33, 37, 41, .25) !important;
+}
+
+
+p{
+  margin-bottom: 0px;
+  margin-top: 0px;
+  align-items: center !important;
+
+}
+
+.configuration{
+  align-items: center !important;
+  margin-bottom: 1rem !important;
+  display: flex!important;
+}
+
+.react-dropdown-tree-select .dropdown .dropdown-trigger {
+    padding: 4px;
+    line-height: 20px;
+    max-height: 200px;
+    display: inline-block;
+    overflow: auto;
+    border: 0px solid #b9b9b9 !important;
+    max-width: 600px;
+}
+
+div.parallelCoordinates{
+  margin: 2em;
+}
+
+g.inactive path{
+  fill: none;
+  stroke: lightgrey;
+  stroke-width: 0.8 !important;
+}
+
+g.active path{
+  opacity: 0.5;
+  stroke: #4e73df;
+  stroke-width: 0.8 !important;
+}
+
+text{
+  font-size: 9px;
+}
+
+.chip{
+  background-color:#6c757d !important;
+  font-size: 11px !important;
+  border-radius: 0px !important;
+  padding: 4px 8px !important;
+}
+
+.highlightOption{
+  background-color: #6c757d !important;
+}
+
+.multiSelectContainer li:hover{
+  background-color: #6c757d !important;
+}
+
+.dropdown-menu{
+  min-width: 200px;
+}

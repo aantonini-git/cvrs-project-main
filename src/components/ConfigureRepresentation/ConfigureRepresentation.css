@@ -1,0 +1,140 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700;900&display=swap');
+
+.flex {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
+.container-main {
+  min-height: 85vh;
+}
+
+/* TITLE */
+.title {
+  text-align: center;
+  padding: 2rem 0;
+  gap: .5rem;
+}
+
+.title>h1 {
+  font-size: 3.5rem;
+  font-weight: 900;
+}
+
+.title>span {
+  font-size: 1.5rem;
+  letter-spacing: 1px;
+  font-weight: lighter;
+}
+
+/* LAYOUT CARDS */
+.grid {
+  padding-bottom: 10px;
+  padding-left: 5px;
+  padding-right: 5px;
+  padding-top: 5px;
+  flex: 1;
+  display: flex;
+  /*grid-template-columns: 1fr 1fr 1fr  1fr 1fr 1fr;*/
+  gap: 1rem;
+  width: 100%;
+}
+
+.layout-cards {
+  flex: 1 0 0%;
+  padding-top: 10px;
+  /*border-radius: 5px;*/
+  transition: all .3s linear;
+  background-color: rgba(36,38,41,0.03);
+}
+
+.layout-cards label{
+  font-size: 0.95em;
+}
+
+.layout-cards>p {
+  border-radius: 5px;
+  background-color: black;
+  text-align: center;
+  font-weight: bold;
+  text-transform: capitalize;
+}
+
+
+.layout-dragging {
+  background: #ffffff17;
+  border: 1px dashed gray;
+}
+
+/* SINGLE CARD */
+.card-container {
+  margin-bottom: 10px;
+  margin-left: 10px;
+  margin-right: 10px;
+  background-color:  rgba(78,115,223,0.1) !important;
+  border-radius: 2px;
+  cursor: pointer;
+  animation: fadeIn .3s ease-in-out;
+  padding: 5px 5px;
+}
+
+.card {
+  /*border: 1px solid #2980b9;  borde azul */
+  /*border-top: .25rem solid rgba(36, 38, 41, 0.3) !important;*/
+  /*border-radius: 8px;*/
+  margin-top: 20px;
+  margin-right: auto;
+  margin-bottom: 20px;
+  margin-left: 0px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+  background-color: white;
+  overflow: hidden; /* para que el border-radius afecte también al header */
+}
+
+.card-header {
+  color:#343a40;
+  padding: 12px 20px;
+  font-size: 1.25rem;
+  font-weight: bold;
+}
+
+.card-body {
+  padding: 10px;
+  color: #333;
+}
+
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0)
+  }
+}
+
+.card-container>p {
+  font-weight: 600;
+}
+
+
+@media screen and (max-width: 800px) {
+
+
+  .grid {
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr;
+    padding-bottom: 10px;
+  }
+
+  .layout-cards {
+    overflow-y: scroll;
+    height: 250px;
+    min-height: 150px;
+    max-height: 250px;
+  }
+}

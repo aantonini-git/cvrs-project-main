@@ -1,0 +1,19 @@
+.hex {
+  stroke: none;
+}
+
+.boundary {
+  stroke: black;
+  stroke-width: 2px;
+}
+
+.tooltip {
+  position: absolute;
+  opacity: 0;
+  background: white;
+  border: 1px solid #ccc;
+  padding: 6px 8px;
+  font-size: 12px;
+  pointer-events: none;
+  border-radius: 4px;
+}

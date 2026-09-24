@@ -1,0 +1,122 @@
+svg {
+  font: 10px sans-serif;
+}
+
+.axis {
+  shape-rendering: crispEdges;
+}
+
+.axis line {
+  stroke: #ddd;
+}
+
+.axis path {
+  display: none;
+}
+
+.cell text {
+  text-transform: capitalize;
+  fill: black;
+  font-weight: bold;
+}
+
+
+circle {
+  /*fill-opacity: .5;*/
+  stroke:none;
+}
+
+
+.extent {
+  fill: #000;
+  fill-opacity: .125;
+  stroke: #fff;
+}
+
+
+/* Estilo para los ejes */
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #ccc; /* Color de las líneas de ejes */
+  shape-rendering: crispEdges;
+}
+
+/* Estilo para el texto de los ejes */
+.axis text {
+  font-size: 10px; /* Tamaño de fuente */
+}
+
+/* Estilo para los títulos de los ejes */
+.axis .title {
+  font-weight: bold;
+}
+
+/* Estilo para las líneas de cuadrícula */
+.grid-line {
+  stroke: #eee; /* Color de las líneas de cuadrícula */
+  stroke-dasharray: 2, 2; /* Patrón de línea punteada */
+}
+
+/* Estilo para los puntos de datos */
+.cell circle {
+  fill: #4e73df; /* Color de los puntos */
+  fill-opacity: 0.7; /* Opacidad de los puntos */
+  stroke: none; /* Sin borde */
+}
+
+/* Estilo para los puntos seleccionados */
+.cell circle.selected {
+  fill: orange; /* Color de los puntos seleccionados */
+}
+
+/* Estilo para el texto en las diagonales */
+.cell text {
+  font-size: 12px; /* Tamaño de fuente */
+  font-weight: bold; /* Texto en negrita */
+}
+
+/* Estilo para el borde de la celda */
+.cell rect {
+  fill: none; /* Sin relleno */
+  stroke: #ccc; /* Color del borde */
+  stroke-width: 1px; /* Ancho del borde */
+}
+
+/* Estilo para los tooltips */
+.tooltip {
+  position: absolute;
+  background-color: white;
+  padding: 5px;
+  border: 1px solid #ccc;
+  pointer-events: none;
+  opacity: 0; /* Inicialmente oculto */
+}
+
+/* Estilo para mostrar los tooltips */
+.tooltip.show {
+  opacity: 1; /* Mostrar tooltip */
+}
+
+.tick line{
+  stroke-width:0.4;
+  color:rgba(0,0,0,0.3)
+}
+
+.selection{
+  fill: rgba(0,0,0,0.6) !important;
+  stroke: none !important;
+}
+
+.handle--n,
+.handle--e,
+.handle--s,
+.handle--w,
+.handle--nw,
+.handle--ne,
+.handle--se,
+.handle--sw{
+  stroke: none !important
+}
+
+

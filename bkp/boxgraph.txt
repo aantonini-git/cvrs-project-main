@@ -1,0 +1,1213 @@
+import { useEffect, useRef, useState } from 'react';
+import DropdownButton from 'react-bootstrap/DropdownButton';
+import DropdownMultiselect from "react-multiselect-dropdown-bootstrap";
+import Dropdown from 'react-bootstrap/Dropdown';
+import './Styles/BoxgraphStyles.css';
+import * as d3 from "d3";
+import { configuration_options } from "../ConfigureTechniques/configuration.js";
+
+export default function BoxGraphTechnique({ id, iddiv, data, categoricalData, identifiersList, selectedCategory, userConfigArray, flag }) {
+ 
+  const [identifiersOptions, setIdentifiersOptions] = useState(
+    identifiersList.map((label, i) => ({ label, key: i }))
+  );
+  const [selectedList, setSelectedList] = useState([]);
+  const [xOptions, setxOption] = useState([]);
+  const [yOptions, setyOption] = useState([]);
+  const [svg, setSVG] = useState(null);
+  const [axesTypeOption, setAxesTypeOption] = useState(0); //ver
+  const [selectedOption, setSelectedOption] = useState([-1,-1]); //ver
+  const [elementX, setElementX] = useState("elementX"); //ver
+  const [elementY, setElementY] = useState("elementY"); //ver
+  const [axesType, setAxesType] = useState("Unstructured"); //ver
+  const [axesOrientation, setAxesOrientation] = useState(""); //ver
+  const [axesOrientationOption, setAxesOrientationOption] = useState(-1); //ver
+
+  useEffect(() => {
+    if(selectedList.length>0){
+        if(axesTypeOption==0)
+          drawChartUnstructured();
+        else {
+        switch (axesOrientationOption){
+          case 0:
+            drawChartUnstructuredSharedAxis();
+          break;
+          case 1:
+            drawChart();
+          break;
+          case 2:
+            drawRadialChart();
+          break;
+          default:
+          break;
+        }
+      }
+    }
+  }, [axesType, axesTypeOption,axesOrientation, axesOrientationOption, selectedOption, selectedList, flag]);
+
+  useEffect(() => {
+
+    // set the dimensions and margins of the graph
+    var margin = {top: 10, right: 50, bottom: 40, left: 40},
+    width = document.getElementById(''+iddiv).offsetWidth - margin.left - margin.right,
+    height = document.getElementById(''+iddiv).offsetHeight- document.getElementById(''+iddiv).offsetHeight/4- margin.top - margin.bottom;
+
+    // append the svg object to the body of the page
+    var svg = d3.select("#"+id)
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+    .append("g")
+    .attr("transform",
+    "translate(" + margin.left + "," + margin.top + ")");
+
+    // Title
+    svg.append('text')
+    .attr('x', width/2)
+    .attr('y', 0)
+    .attr('text-anchor', 'middle')
+    .style('font-size', 20)
+    .text('');
+
+
+    setSVG(svg);
+
+    const idUnstructured = configuration_options.find(opt => opt.label === "Unstructured")?.bit; 
+    const idQuantitative = configuration_options.find(opt => opt.label === "Quantitative")?.bit; 
+
+    const idOrthogonal = configuration_options.find(opt => opt.label === "Orthogonal")?.bit; 
+    const idParallel = configuration_options.find(opt => opt.label === "Parallel")?.bit; 
+    const idRadial = configuration_options.find(opt => opt.label === "Radial")?.bit; 
+
+    var axesType;
+    (userConfigArray[idUnstructured]==1  && userConfigArray[idQuantitative]==0)?axesType='Unstructured':axesType='Quantitative';
+    if(axesType=='Unstructured'){
+      setSelectedOption([-1,-1]);
+      setElementX("element X");
+      setElementY("element Y");
+      setAxesType("Unstructured");
+      setAxesTypeOption(0);
+      setAxesOrientation("Undefined");
+      setAxesOrientationOption(3);
+    }
+    else {
+      setAxesType("Quantitative");
+      setAxesTypeOption(1);
+
+      if(userConfigArray[idOrthogonal]==1){
+        setAxesOrientation("Orthogonal");
+        setAxesOrientationOption(0);
+      }
+      else {
+        if(userConfigArray[idParallel]==1){
+          setAxesOrientation("Parallel");
+          setAxesOrientationOption(1);
+        }
+        else {
+          if(userConfigArray[idRadial]==1){
+            setAxesOrientation("Radial");
+            setAxesOrientationOption(2);
+          }
+          else {
+            setAxesOrientation("Undefined");
+            setAxesOrientationOption(3);
+          }
+        }
+      }
+    }
+    setAxesType(axesType);
+    updateOptions();
+  }, [data]);
+
+   function onSelect(selectedList) {
+ 
+    const result = identifiersOptions
+      .filter(item => selectedList.includes(item.key.toString())) // filtrar solo los que estén en selectedKeys
+      .map(item => ({
+        name: item.label,
+        id: Number(item.key) // convertir a número
+    }));
+
+    var aux = [];
+    result.forEach((element) => aux.push(element.name));
+
+    setSelectedList(aux)
+  }
+
+  function updateOptions(){
+    let dropOptionsX = [];
+    let labelsX = [];
+
+    for(let i = 0; i<identifiersList.length; i++){
+      dropOptionsX.push(<Dropdown.Item id={"optx" + i} key={"optx" + i} eventKey={"optx" + i}> {identifiersList[i]}</Dropdown.Item>);
+    }
+
+    setxOption(dropOptionsX);
+  }
+
+  function drawChartUnstructured() {
+  // Dimensiones
+  const margin = { top: 60, right: 50, bottom: 80, left: 50 };
+  const width = document.getElementById(iddiv).offsetWidth - margin.left - margin.right;
+  const height = document.getElementById(iddiv).offsetHeight - document.getElementById(iddiv).offsetHeight / 4 - margin.top - margin.bottom;
+
+  // Limpiar SVG
+  d3.select("#" + id).select("g").selectAll("*").remove();
+
+  const svg = d3.select("#" + id)
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+    .append("g")
+    .attr("transform", `translate(${margin.left},${margin.top})`);
+
+  const labels = selectedList || [];
+
+  // Función para calcular estadísticas
+  function computeBoxStats(values) {
+    const sorted = values.slice().sort(d3.ascending);
+    const q1 = d3.quantile(sorted, 0.25);
+    const median = d3.quantile(sorted, 0.5);
+    const q3 = d3.quantile(sorted, 0.75);
+    const iqr = q3 - q1;
+    const minVal = Math.max(d3.min(sorted), q1 - 1.5 * iqr);
+    const maxVal = Math.min(d3.max(sorted), q3 + 1.5 * iqr);
+    return { min: minVal, q1, median, q3, max: maxVal };
+  }
+
+  // Categorías
+  let categories = [];
+  if (selectedCategory && Array.isArray(categoricalData)) {
+    categories = Array.from(new Set(categoricalData.map(d => d[selectedCategory])));
+  }
+
+  // Construir datos: cada combinación label-categoría
+  let boxPlotData = [];
+  if (categories.length > 0) {
+    labels.forEach(label => {
+      categories.forEach(cat => {
+        const values = data
+          .filter((d, idx) => categoricalData[idx]?.[selectedCategory] === cat)
+          .map(d => d[label])
+          .filter(v => v != null);
+        if (values.length) {
+          boxPlotData.push({
+            label,
+            category: cat,
+            stats: computeBoxStats(values)
+          });
+        }
+      });
+    });
+  } else {
+    labels.forEach(label => {
+      const values = data.map(d => d[label]).filter(v => v != null);
+      if (values.length) {
+        boxPlotData.push({
+          label,
+          category: null,
+          stats: computeBoxStats(values)
+        });
+      }
+    });
+  }
+
+  // Escalas
+  const x0 = d3.scaleBand()
+    .domain(labels)
+    .range([0, width])
+    .padding(0.3);
+
+  const x1 = categories.length > 0
+    ? d3.scaleBand().domain(categories).range([0, x0.bandwidth()]).padding(0.2)
+    : null;
+
+  const yMin = d3.min(boxPlotData, d => d.stats.min);
+  const yMax = d3.max(boxPlotData, d => d.stats.max);
+  const yScale = d3.scaleLinear().domain([yMin, yMax]).nice().range([height, 0]);
+
+  // Eje Y global
+  svg.append("g").call(d3.axisLeft(yScale));
+
+  // Dibujar boxplots
+  boxPlotData.forEach(d => {
+    const g = svg.append("g").attr("transform", `translate(${x0(d.label)},0)`);
+
+    const xCenter = categories.length > 0
+      ? x1(d.category) + x1.bandwidth() / 2
+      : x0.bandwidth() / 2;
+
+    const boxWidth = categories.length > 0 ? x1.bandwidth() : x0.bandwidth() / 2;
+
+    // Línea vertical
+    g.append("line")
+      .attr("x1", xCenter).attr("x2", xCenter)
+      .attr("y1", yScale(d.stats.min)).attr("y2", yScale(d.stats.max))
+      .attr("stroke", "black");
+
+    // Caja
+    g.append("rect")
+      .attr("x", xCenter - boxWidth / 2)
+      .attr("y", yScale(d.stats.q3))
+      .attr("width", boxWidth)
+      .attr("height", yScale(d.stats.q1) - yScale(d.stats.q3))
+      .attr("stroke", "black")
+      .style("fill", "#4e73df");
+
+    // Líneas horizontales (min, mediana, max)
+    [d.stats.min, d.stats.median, d.stats.max].forEach(val => {
+      g.append("line")
+        .attr("x1", xCenter - boxWidth / 2)
+        .attr("x2", xCenter + boxWidth / 2)
+        .attr("y1", yScale(val))
+        .attr("y2", yScale(val))
+        .attr("stroke", "black");
+    });
+  });
+
+  // Eje X global con labels
+  svg.append("g")
+    .attr("transform", `translate(0,${height})`)
+    .call(d3.axisBottom(x0));
+
+  setSVG(svg);
+}
+
+
+
+
+
+  function drawRadialChart() {
+    // Definir dimensiones
+    var margin = { top: 80, right: 80, bottom: 80, left: 80 };
+    var width = document.getElementById('' + iddiv).offsetWidth - margin.left - margin.right;
+    var height = document.getElementById('' + iddiv).offsetHeight - document.getElementById('' + iddiv).offsetHeight/8 - margin.top - margin.bottom;
+    var radius = Math.min(width, height) / 2;
+
+    d3.select("#" + id).select("g").selectAll("*").remove();
+
+    var svg = d3.select("#" + id)
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+    .select("g")
+    .attr("transform", `translate(${width/2+margin.left}, ${height/2+margin.top})`);
+
+    // Obtener las etiquetas de las columnas desde this.props.labels
+    //const labels = identifiersList;
+
+    // Etiquetas de columnas
+    const labels = selectedList || [];
+
+    // Categorías únicas (si aplica)
+    let categories = null;
+    if (selectedCategory && Array.isArray(categoricalData)) {
+      categories = Array.from(new Set(categoricalData.map(d => d[selectedCategory])));
+    }
+
+    // Calcular los valores estadísticos para cada columna
+    const boxPlotData = labels.map(label => {
+      const columnData = data.map(d => d[label]);
+
+      // Encuentra los valores mínimo y máximo
+      const min = Math.min(...columnData);
+      const max = Math.max(...columnData);
+
+      // Normaliza los valores entre 0 y 1
+      const normalizedData = columnData.map(value => value);
+
+      // Calcular los valores estadísticos necesarios para el boxplot
+      const minVal = d3.min(normalizedData);
+      const maxVal = d3.max(normalizedData);
+      const q1 = d3.quantile(normalizedData.sort(d3.ascending), 0.25);
+      const median = d3.quantile(normalizedData.sort(d3.ascending), 0.5);
+      const q3 = d3.quantile(normalizedData.sort(d3.ascending), 0.75);
+      const iqr = q3 - q1;
+      const outliers = normalizedData.filter(d => d < q1 - 1.5 * iqr || d > q3 + 1.5 * iqr);
+
+      return {
+        label: label,
+        min: minVal,
+        q1: q1.toFixed(2),
+        median: median.toFixed(2),
+        q3: q3.toFixed(2),
+        max: maxVal.toFixed(2),
+        outliers: outliers
+      };
+    });
+
+    const angleSlice = (2 * Math.PI) / boxPlotData.length;
+
+    // Función para convertir ángulo y radio a coordenadas x, y
+    const angleToCoord = (angle, value, scale) => {
+      return {
+        x: Math.cos(angle - Math.PI / 2) * scale(value),  // Restar PI/2 para alinear correctamente
+        y: Math.sin(angle - Math.PI / 2) * scale(value)
+      };
+    };
+
+    // Función para dibujar un boxplot
+    const drawBoxplot = (g, data, angle, scale) => {
+      // Rotar el grupo
+      g.attr("transform", `rotate(${angle * 180 / Math.PI})`);
+
+      // Box
+      g.append("rect")
+      .attr("x", -5)
+      .attr("y", d => scale(d.q1))
+      .attr("height", d => Math.abs(scale(d.q1) - scale(d.q3))) // Asegurar que la altura sea positiva
+      .attr("width", 10)
+      .attr("stroke", "black")
+      .attr("fill", "#ffffff")
+      .attr("stroke-width", 1);
+
+      // Median line
+      g.append("line")
+      .attr("x1", -5)
+      .attr("x2", 5)
+      .attr("y1", d => scale(d.median))
+      .attr("y2", d => scale(d.median))
+      .attr("stroke", "black")
+      .attr("stroke-width", 2);
+
+      // Whiskers
+      g.append("line")
+      .attr("x1", 0)
+      .attr("x2", 0)
+      .attr("y1", d => scale(d.min))
+      .attr("y2", d => scale(d.q1))
+      .attr("stroke", "black")
+      .attr("stroke-width", 1);
+
+      g.append("line")
+      .attr("x1", 0)
+      .attr("x2", 0)
+      .attr("y1", d => scale(d.max))
+      .attr("y2", d => scale(d.q3))
+      .attr("stroke", "black")
+      .attr("stroke-width", 1);
+
+      // Whisker caps
+      g.append("line")
+      .attr("x1", -5)
+      .attr("x2", 5)
+      .attr("y1", d => scale(d.min))
+      .attr("y2", d => scale(d.min))
+      .attr("stroke", "black")
+      .attr("stroke-width", 1);
+
+      g.append("line")
+      .attr("x1", -5)
+      .attr("x2", 5)
+      .attr("y1", d => scale(d.max))
+      .attr("y2", d => scale(d.max))
+      .attr("stroke", "black")
+      .attr("stroke-width", 1);
+
+      // Outliers
+      g.selectAll("circle")
+      .data(d => d.outliers.map(outlier => ({ outlier: outlier, label: d.label })))
+      .enter()
+      .append("circle")
+      .attr("cx", 5)
+      .attr("cy", d => scale(d.outlier))
+      .attr("r", 3)
+      .attr("stroke", "black")
+      .attr("fill", "red")
+      .attr("stroke-width", 1);
+
+      // Añadir etiquetas de valores
+      g.append("text")
+      .attr("x", 0)
+      .attr("y", d => scale(d.min))
+      .attr("dy", "-0.5em")
+      .style("font-size", "10px")
+      .text(d => `Min: ${d.min}`);
+
+      g.append("text")
+      .attr("x", 12)
+      .attr("y", d => scale(d.median))
+      .attr("dy", "0.35em")
+      .style("font-size", "10px")
+      .text(d => `Med: ${d.median}`);
+
+      g.append("text")
+      .attr("x", 0)
+      .attr("y", d => scale(d.max))
+      .attr("dy", "1em")
+      .style("font-size", "10px")
+      .text(d => `Max: ${d.max}`);
+
+
+      // Añadir etiquetas de los ejes
+      g.append("text")
+      .attr("class", "axis-label")
+      .attr("x", 0)
+      .attr("y", d => scale(d.max) + 20)
+      .attr("text-anchor", "middle")
+      .style("font-size", "12px")
+      .text(d => d.label);
+    };
+
+    // Dibujar cada boxplot
+    svg.selectAll(".boxplot")
+    .data(boxPlotData)
+    .enter()
+    .append("g")
+    .attr("class", "boxplot")
+    .each(function(d, i) {
+      // Crear una escala radial independiente para cada eje
+      const rScale = d3.scaleLinear()
+      .domain([d.min, d.max])
+      .range([30, radius]);
+
+      drawBoxplot(d3.select(this), d, i * angleSlice, rScale);
+
+      // Dibujar la línea radial corta para cada eje
+      /*
+      svg.append("line")
+      .attr("class", "radial-line")
+      .attr("x1", - (angleToCoord(i * angleSlice, 8, rScale).x)/2)
+      .attr("y1", - (angleToCoord(i * angleSlice, 8, rScale).y)/2)
+      .attr("x2",  (angleToCoord(i * angleSlice, 8, rScale).x)/2)
+      .attr("y2", (angleToCoord(i * angleSlice, 8, rScale).y)/2)
+      .attr("stroke", "gray")
+      .attr("stroke-width", 1)
+      .attr("stroke-dasharray", "2,2");*/
+
+
+    });
+
+    // Función para dibujar líneas de coordenadas paralelas en el gráfico radial
+    const drawParallelCoordinates = () => {
+      const line = d3.lineRadial()
+      .angle((d, i) => i * angleSlice + Math.PI)  // Añadir Math.PI para rotar 180 grados
+      .radius((d, i) => {
+      const scale = d3.scaleLinear()
+      .domain([d3.min(data.map(e => e[d.label])), d3.max(data.map(e => e[d.label]))])
+      .range([30, radius]);
+      return scale(d.value);
+    });
+
+     data.forEach(datum => {
+       // Crear lineData y cerrar el camino añadiendo el primer punto al final
+       const lineData = labels.map(label => ({
+         label: label,
+         value: datum[label],
+         color: categoricalData[datum.index][selectedCategory]
+       }));
+       lineData.push(lineData[0]);  // Añadir el primer punto al final para cerrar el camino
+
+        // Escala de colores
+        let color = d3.scaleOrdinal(d3.schemeCategory10);
+        if (categories) {
+          color = d3.scaleOrdinal().domain(categories).range(d3.schemeCategory10);
+        }
+
+
+       svg.append("path")
+       .datum(lineData)
+       .attr("fill", "none")
+       .style("stroke", () => color(lineData[0].color))
+       .attr("stroke-width", 0.5)
+       .style("opacity", 0.2)
+       .attr("d", line);
+     });
+
+      const brush = d3.brushY()
+      .extent([[-10, 0], [10, radius]])
+      .on("brush", brushed)
+      .on("end", brushed);
+
+      const axes = svg.selectAll(".axis")
+      .data(labels)
+      .enter()
+      .append("g")
+      .attr("class", "axis")
+      .attr("data-label", d => d)  // Adjuntar etiqueta correcta
+      .attr("transform", (d, i) => `rotate(${(i * angleSlice) * 180 / Math.PI})`);
+
+      axes.append("line")
+      .attr("x1", 0)
+      .attr("y1", 0)
+      .attr("x2", 0)
+      .attr("y2", radius)
+      .attr("stroke", "black");
+/*
+      axes.append("text")
+      .attr("x", 0)
+      .attr("y", radius + 20)
+      .attr("text-anchor", "middle")
+      .style("font-size", "12px")
+      .style("fill","black")
+      .text(d => d);*/
+
+      axes.call(brush);
+
+      const selections = {};
+
+      function brushed(event) {
+        const brushSelection = d3.event.selection;
+        const brushedLabel = d3.select(this).attr("data-label");
+
+        if (!brushSelection) {
+          delete selections[brushedLabel];
+        } else {
+          const [y0, y1] = brushSelection;
+
+          // Crear una escala radial adecuada para el eje actual
+          const scale = d3.scaleLinear()
+          .domain([30, radius]) // Ajustar el dominio basado en el rango radial usado
+          .range([d3.min(data.map(d => d[brushedLabel])), d3.max(data.map(d => d[brushedLabel]))]);
+
+          // Convertir las coordenadas del brush a valores de datos
+          const minValue = scale(y0);
+          const maxValue = scale(y1);
+          selections[brushedLabel] = { minValue, maxValue };
+        }
+
+        // Actualizar el gráfico basado en las selecciones
+        updatePaths();
+      }
+      const cbk_selectedData = null;//this.props.cbk_selectedData;
+      function updatePaths() {
+        const selectedIndices = [];
+
+        svg.selectAll("path").style("stroke", function(d, i) {
+          const isSelected = Object.keys(selections).every(label => {
+            const { minValue, maxValue } = selections[label];
+            return data[i][label] >= minValue && data[i][label] <= maxValue;
+          });
+
+          if (isSelected) selectedIndices.push(i);
+          return isSelected ? "rgb(78, 115, 223)" : "grey";
+        });
+
+        //cbk_selectedData(selectedIndices);
+      }
+    };
+
+    // Llamar a la función para dibujar las líneas de coordenadas paralelas
+    drawParallelCoordinates();
+
+    setSVG(svg);
+  }
+
+  function drawChart(){
+
+    // Definir dimensiones
+    var margin = {top: 20, right: 50, bottom: 40, left: 40};
+    var width = document.getElementById('' + iddiv).offsetWidth - margin.left - margin.right;
+    var height = document.getElementById('' + iddiv).offsetHeight - document.getElementById('' + iddiv).offsetHeight / 4 - margin.top - margin.bottom;
+
+    d3.select("#" + id).select("g").selectAll("*").remove()
+
+    var svg = d3.select("#" + id)
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+    .select("g")
+    .attr("transform","translate(" + margin.left + "," + margin.top + ")");
+
+    // Obtener las etiquetas de las columnas desde this.props.labels
+    const labels = selectedList || [];
+
+    // Calcular los valores estadísticos para cada columna
+    const boxPlotData = labels.map(label => {
+
+      const columnData = data.map(d => d[label]);
+
+      // Calcular los valores estadísticos necesarios para el boxplot
+      const minVal = d3.min(columnData);
+      const maxVal = d3.max(columnData);
+      const q1 = d3.quantile(columnData.sort(d3.ascending), 0.25);
+      const median = d3.quantile(columnData.sort(d3.ascending), 0.5);
+      const q3 = d3.quantile(columnData.sort(d3.ascending), 0.75);
+      const iqr = q3 - q1;
+      const outliers = columnData.filter(d => d < q1 - 1.5 * iqr || d > q3 + 1.5 * iqr);
+
+      return {
+        label: label,
+        min: minVal,
+        q1: q1,
+        median: median,
+        q3: q3,
+        max: maxVal,
+        outliers: outliers
+      };
+    });
+
+    // Escala X para los boxplots
+    const xScale = d3.scaleBand()
+    .domain(boxPlotData.map(d => d.label))
+    .range([0, width])
+    .padding(0.4);
+
+    // Escala Y para los valores de los datos
+    const yScale = d3.scaleLinear()
+    .domain([d3.min(boxPlotData, d => d.min), d3.max(boxPlotData, d => d.max)])
+    .nice()
+    .range([height, 0]);
+
+    // Eje X
+    svg.append("g")
+    .attr("class", "x axis")
+    .attr("transform", `translate(0, ${height})`)
+    .call(d3.axisBottom(xScale));
+
+    // Eje Y
+    svg.append("g")
+    .attr("class", "y axis")
+    .call(d3.axisLeft(yScale))
+    .style("opacity", function(event, d) {
+      if(axesType=="Unstructured")
+      return 0;
+      else {
+        return 1;
+      }
+    });
+
+    // Función para dibujar un boxplot
+    const drawBoxplot = (g, data) => {
+      // Box
+      g.append("rect")
+      .attr("x", d => xScale(d.label))
+      .attr("y", d => yScale(d.q3))
+      .attr("height", d => yScale(d.q1) - yScale(d.q3))
+      .attr("width", xScale.bandwidth())
+      .attr("stroke", "black")
+      .attr("fill", "#ffffff")
+      .attr("stroke-width", 1)
+
+      // Median line
+      g.append("line")
+      .attr("x1", d => xScale(d.label))
+      .attr("x2", d => xScale(d.label) + xScale.bandwidth())
+      .attr("y1", d => yScale(d.median))
+      .attr("y2", d => yScale(d.median))
+      .attr("stroke", "black")
+      .attr("stroke-width", 2);
+
+      // Whiskers
+      g.append("line")
+      .attr("x1", d => xScale(d.label) + xScale.bandwidth() / 2)
+      .attr("x2", d => xScale(d.label) + xScale.bandwidth() / 2)
+      .attr("y1", d => yScale(d.min))
+      .attr("y2", d => yScale(d.q1))
+      .attr("stroke", "black")
+      .attr("stroke-width", 1);
+
+      g.append("line")
+      .attr("x1", d => xScale(d.label) + xScale.bandwidth() / 2)
+      .attr("x2", d => xScale(d.label) + xScale.bandwidth() / 2)
+      .attr("y1", d => yScale(d.max))
+      .attr("y2", d => yScale(d.q3))
+      .attr("stroke", "black")
+      .attr("stroke-width", 1);
+
+      // Whisker caps
+      g.append("line")
+      .attr("x1", d => xScale(d.label) + xScale.bandwidth() / 4)
+      .attr("x2", d => xScale(d.label) + xScale.bandwidth() * 3 / 4)
+      .attr("y1", d => yScale(d.min))
+      .attr("y2", d => yScale(d.min))
+      .attr("stroke", "black")
+      .attr("stroke-width", 1);
+
+      g.append("line")
+      .attr("x1", d => xScale(d.label) + xScale.bandwidth() / 4)
+      .attr("x2", d => xScale(d.label) + xScale.bandwidth() * 3 / 4)
+      .attr("y1", d => yScale(d.max))
+      .attr("y2", d => yScale(d.max))
+      .attr("stroke", "black")
+      .attr("stroke-width", 1);
+
+      // Outliers
+      g.selectAll("circle")
+      .data(d => d.outliers.map(outlier => ({ outlier: outlier, label: d.label })))
+      .enter()
+      .append("circle")
+      .attr("cx", d => xScale(d.label) + xScale.bandwidth() / 2)
+      .attr("cy", d => yScale(d.outlier))
+      .attr("r", 3)
+      .attr("stroke", "black")
+      .attr("fill", "red")
+      .attr("stroke-width", 1);
+
+
+      // Añadir etiquetas de valores
+      g.append("text")
+      .attr("x", d => xScale(d.label))
+      .attr("y", d => yScale(d.min)+14)
+      .attr("dy", "-0.5em")
+      .style("font-size", "10px")
+      .text(d => `Min: ${d.min}`);
+
+      g.append("text")
+      .attr("x", d => xScale(d.label))
+      .attr("y", d => yScale(d.median)-6)
+      .attr("dy", "0.35em")
+      .style("font-size", "10px")
+      .text(d => `Med: ${d.median}`);
+
+      g.append("text")
+      .attr("x", d => xScale(d.label))
+      .attr("y", d => yScale(d.max)-12)
+      .attr("dy", "1em")
+      .style("font-size", "10px")
+      .text(d => `Max: ${d.max}`);
+    };
+
+    // Dibujar cada boxplot
+    svg.selectAll(".boxplot")
+    .data(boxPlotData)
+    .enter()
+    .append("g")
+    .attr("class", "boxplot")
+    .call(g => drawBoxplot(g, boxPlotData));
+
+    const drawParallelCoordinates = () => {
+      const line = d3.line()
+      .x(d => xScale(d.label) + xScale.bandwidth() / 2)
+      .y(d => yScale(d.value));
+
+      const pathGroup = svg.append("g");
+
+      const selectedDataIds = [];//this.props.selectedDataIds;
+
+      // Dibujar las líneas de datos
+      data.forEach((datum,i )=> {
+        const lineData = labels.map(label => ({
+          label: label,
+          value: datum[label]
+        }));
+
+        pathGroup.append('path')
+        .datum(lineData)
+        .attr('d', line)
+        .attr('class','active')
+        .attr("fill", "none")
+        .style("stroke", function() {
+          if(selectedDataIds.length==0)
+          return "#000000";
+          else {
+            return (selectedDataIds.includes(i))? "rgba(78, 115, 223, 0.2)" : "rgba(0,0,0,0.2)";
+          }
+        })
+        .attr("stroke-width", 0.5)
+        .style("opacity", 0.2);
+      });
+
+      // Crear un grupo para los brushes
+      const brushGroup = svg.append("g").attr("class", "brushes");
+
+      const brush = d3.brushY()
+      .extent([[-10, 0], [10, height]])
+      .on("brush", brushed)
+      .on("end", brushed);
+
+      // Crear un objeto para almacenar las selecciones de cada eje
+      const selections = {};
+
+      // Añadir brushes a cada eje
+      labels.forEach((label, i) => {
+        brushGroup.append("g")
+        .attr("class", "brush")
+        .attr("data-label", label)
+        .attr("transform", `translate(${xScale(label) + xScale.bandwidth() / 2},0)`)
+        .call(brush);
+      });
+
+      const cbk_selectedData = null;//this.props.cbk_selectedData;
+
+      function brushed(event) {
+        const selection = d3.event.selection;
+        const brushedLabel = d3.select(this).attr("data-label");
+
+        // Si la selección es nula, se borra la selección para ese eje
+        if (!selection) {
+          delete selections[brushedLabel];
+        } else {
+          // Almacenar o actualizar la selección del eje actual
+          const [y0, y1] = selection;
+          selections[brushedLabel] = { y0, y1 };
+        }
+
+        // Actualizar el gráfico basándose en todas las selecciones
+        updatePaths();
+      }
+
+      function updatePaths() {
+        const selectedIndices = [];
+
+        pathGroup.selectAll("path")
+        .style("stroke", function(d, i) {
+          // Verificar si la línea cumple con todas las selecciones activas
+          const isSelected = Object.keys(selections).every(label => {
+            const { y0, y1 } = selections[label];
+            return d.some(point => point.label === label && yScale(point.value) >= y0 && yScale(point.value) <= y1);
+          });
+
+          if (isSelected) selectedIndices.push(i);
+          return isSelected ? "rgb(78, 115, 223)" : "grey";
+        });
+
+        cbk_selectedData(selectedIndices);
+
+      }
+
+      function updatePaths() {
+        const selectedIndices = [];
+
+        pathGroup.selectAll("path")
+        .style("stroke", function(d, i) {
+          // Verificar si la línea cumple con todas las selecciones activas
+          const isSelected = labels.every(label => {
+            const { y0, y1 } = selections[label] || {};
+            return !y0 || !y1 || (d.some(point => point.label === label && yScale(point.value) >= y0 && yScale(point.value) <= y1));
+          });
+
+          if (isSelected) selectedIndices.push(i);
+          return isSelected ? "rgb(78, 115, 223)" : "grey";
+        });
+
+        cbk_selectedData(selectedIndices);
+      }
+
+      // Inicializar las selecciones si es necesario
+      function initializeSelections() {
+        labels.forEach(label => {
+          selections[label] = null; // O una selección predeterminada si es necesario
+        });
+      }
+
+      initializeSelections();
+
+    };
+
+    if(axesTypeOption==1 && axesOrientationOption==1)
+      // Dibujar las líneas de coordenadas paralelas
+      drawParallelCoordinates();
+
+    // Estilo para los ejes
+    svg.selectAll("text")
+    .style("font-size", "12px")
+
+    /*
+    svg.selectAll("line")
+    .style("stroke", "black");*/
+
+    setSVG(svg);
+  }
+
+  function drawChartUnstructuredSharedAxis() {
+    // Dimensiones base
+    var margin = { top: 40, right: 20, bottom: 50, left: 40 };
+    const containerWidth = document.getElementById(iddiv).offsetWidth;
+    const containerHeight = document.getElementById(iddiv).offsetHeight - margin.bottom - margin.top;
+
+    const labels = selectedList || [];
+
+    // Detectar categorías
+    let categories = null;
+    if (selectedCategory && Array.isArray(categoricalData)) {
+        categories = Array.from(new Set(categoricalData.map(d => d[selectedCategory])));
+    }
+
+    const numCategories = categories ? categories.length : 1;
+
+    // Altura por gráfico (por categoría)
+    const chartHeight = (containerHeight - margin.top - margin.bottom) / numCategories;
+    const totalHeight = chartHeight * numCategories + margin.top + margin.bottom;
+    const width = containerWidth - margin.left - margin.right;
+
+    // Limpiar SVG previo
+    d3.select("#" + id).selectAll("*").remove();
+
+    // Crear SVG
+    var svg = d3.select("#" + id)
+        .attr("width", containerWidth)
+        .attr("height", totalHeight);
+
+    // Escala de color
+    let color = d3.scaleOrdinal(d3.schemeCategory10);
+    if (categories) {
+        color.domain(categories);
+    }
+
+    // Escala Y común
+    const allValues = labels.flatMap(label =>
+        data.map(d => +d[label]).filter(v => !isNaN(v))
+    );
+
+    const yScale = d3.scaleLinear()
+        .domain([d3.min(allValues), d3.max(allValues)])
+        .range([chartHeight, 0])
+        .nice();
+
+    // Escala X para los labels (columnas)
+    const xScale = d3.scaleBand()
+        .domain(labels)
+        .range([0, width])
+        .padding(0.2);
+
+    // Función de estadísticas (boxplot)
+    function computeStats(values) {
+        values.sort(d3.ascending);
+        const minVal = d3.min(values);
+        const maxVal = d3.max(values);
+        const q1 = d3.quantile(values, 0.25);
+        const median = d3.quantile(values, 0.5);
+        const q3 = d3.quantile(values, 0.75);
+        const iqr = q3 - q1;
+        const min = Math.max(minVal, q1 - 1.5 * iqr);
+        const max = Math.min(maxVal, q3 + 1.5 * iqr);
+        const outliers = values.filter(d => d < min || d > max);
+        return { min, q1, median, q3, max, outliers };
+    }
+
+    // Función para dibujar un boxplot
+    function drawBoxplot(g, stats, xCenter, boxWidth, fill) {
+        g.append("line")
+            .attr("x1", xCenter)
+            .attr("x2", xCenter)
+            .attr("y1", yScale(stats.min))
+            .attr("y2", yScale(stats.max))
+            .attr("stroke", "black");
+
+        g.append("rect")
+            .attr("x", xCenter - boxWidth / 2)
+            .attr("y", yScale(stats.q3))
+            .attr("height", yScale(stats.q1) - yScale(stats.q3))
+            .attr("width", boxWidth)
+            .attr("stroke", "black")
+            .style("fill", fill);
+
+        g.selectAll("line.horizontal")
+            .data([stats.min, stats.median, stats.max])
+            .enter()
+            .append("line")
+            .attr("class", "horizontal")
+            .attr("x1", xCenter - boxWidth / 2)
+            .attr("x2", xCenter + boxWidth / 2)
+            .attr("y1", d => yScale(d))
+            .attr("y2", d => yScale(d))
+            .attr("stroke", "black");
+    }
+
+    // Renderizado por categoría o único gráfico si no hay
+    const cats = categories || [null];
+
+    cats.forEach((cat, i) => {
+        const group = svg.append("g")
+            .attr("transform", `translate(${margin.left}, ${margin.top + i * chartHeight + 50})`);
+
+        const filteredData = cat
+            ? data.filter((d, idx) => categoricalData[idx]?.[selectedCategory] === cat)
+            : data;
+
+        // Fondo gris para separar visualmente
+        group.append("rect")
+            .attr("x", -margin.left)
+            .attr("y", 0)
+            .attr("width", containerWidth)
+            .attr("height", containerHeight)
+            .attr("fill", i % 2 === 0 ? "#f9f9f9" : "#ffffff");
+
+        // Ejes
+        group.append("g")
+            .attr("class", "y axis")
+            .call(d3.axisLeft(yScale));
+
+        group.append("g")
+            .attr("class", "x axis")
+            .attr("transform", `translate(0, ${chartHeight})`)
+            .call(d3.axisBottom(xScale))
+            .selectAll("text")
+            .style("text-anchor", "end");
+        /*
+        // Título de categoría
+        group.append("text")
+            .attr("x", width / 2)
+            .attr("y", -10)
+            .attr("text-anchor", "middle")
+            .style("font-size", "14px")
+            .text(cat || "Datos generales");*/
+
+        labels.forEach(label => {
+            const values = filteredData.map(d => +d[label]).filter(v => !isNaN(v));
+            if (values.length === 0) return;
+
+            const stats = computeStats(values);
+            const xCenter = xScale(label) + xScale.bandwidth() / 2;
+            const g = group.append("g");
+
+            drawBoxplot(g, stats, xCenter, xScale.bandwidth() * 0.8, cat ? color(cat) : "#ccc");
+        });
+    });
+
+    if (selectedCategory != null) {
+      // Crear contenedor para la leyenda
+      var legend = svg.append('g')
+      .attr('transform', 'translate(' + (width + margin.right - 100) + ', 20)'); // Posicionar leyenda
+
+    
+      legend.selectAll('rect')
+      .data(categories)
+      .enter()
+      .append('rect')
+      .attr('x', -15)
+      .attr('y', (d, i) => i * 20)
+      .attr('width', 18)
+      .attr('height', 18)
+      .style("fill", d => color(d));
+
+      legend.selectAll('text')
+      .data(categories)
+      .enter()
+      .append('text')
+      .attr('x', 10)
+      .attr('y', (d, i) => i * 20 + 15)
+      .text(d => d)
+      .style('font-size', '10px')
+      .attr('fill', '#000');
+
+    }
+
+
+    setSVG(svg);
+}
+
+
+  /*
+  function updateDraw(selectedDataIds){
+    var svg = d3.select("#" + id)
+    const pathGroup = svg.selectAll('path')
+    .style('stroke', function(d,i){
+      if(selectedDataIds.length==0)
+      return "rgb(78, 115, 223)";
+      else {
+        return (selectedDataIds.includes(i) || selectedDataIds.length==0)? "rgb(78, 115, 223)" : "grey";
+      }
+    })
+  }*/
+
+  function selectAxesTypeOption(evt){
+    let axes = evt.toString()[4];
+    let option = evt.toString()[5];
+
+    if(axes=='t'){ //axes-type
+      if(option==0){ //Unstructured
+        setSelectedOption([-1,-1]);
+        setElementX("element X");
+        setElementY("element Y");
+        setAxesType("Unstructered");
+        setAxesTypeOption(0);
+      }
+      else { //Quantitative
+        setAxesType("Quantitative");
+        setAxesTypeOption(1);
+      }
+    }
+    else { //axes-orientation
+      var orientations = ["Orthogonal","Parallel","Radial"];
+      setAxesOrientation(orientations[option]);
+      setAxesOrientationOption(parseInt(option));
+    }
+  }
+
+  function selectOption(evt,id){
+    let option = parseInt(evt.toString()[4]);
+    let selectedOp = selectedOption;
+
+    if(id == 0){ //selecciono eje x
+      d3.select("#"+iddiv).select(".axisx").text(""+identifiersList[option]);
+      setElementX(identifiersList[option])
+      selectedOp[0] = option;
+      setSelectedOption(selectedOp);
+    }
+    else {//selecciono eje y
+      d3.select("#"+iddiv).select(".axisy").text(""+identifiersList[option]);
+      setElementY(identifiersList[option]);
+      selectedOp[1] = option;
+      setSelectedOption(selectedOp);
+    }
+  
+    if(selectedOp[0]>-1 && selectedOp[1]>-1){
+      drawChart();
+    }
+  }
+
+  /*function updateSelectedData(props){
+    let selectedDataIds = props.selectedDataIds;
+
+    d3.select("#"+this.props.id).selectAll(".select_circles")
+    .style("fill",function(d,i){
+      if(selectedDataIds.includes(d.i) || selectedDataIds.length==0) return  "#4e73df";
+      else{
+        return "lightgrey";
+      }
+    })
+    .classed("selected_items",function(d,i){
+      //if(filteredData_umap.includes(d)) return true;
+      if(selectedDataIds.includes(d.i)) return  true;
+      else{
+        return false;
+      }
+    })
+
+    d3.select("#"+this.props.id).selectAll(".selected_items").raise();
+  }*/
+
+  return (
+    <div>
+      <div className={"configuration"} style={{display:"flex"}}>
+        <div className="dropdown-option" style={{display:"flex"}}>
+          <p> axes-type:</p>
+          <DropdownButton
+            title={axesType}
+            id={"btn-axisx"}
+            onSelect={(e) => selectAxesTypeOption(e)}
+          >
+            <Dropdown.Item id={"axest0"} key={"axest0"} eventKey={"axest0"}>
+              Unstructured
+            </Dropdown.Item>
+            <Dropdown.Item id={"axest1"} key={"axest1"} eventKey={"axest1"}>
+              Quantitative
+            </Dropdown.Item>
+          </DropdownButton>
+        </div>
+
+        <div className="dropdown-option" style={{display:"flex"}}>
+          <p> axes-orientation:</p>
+          <DropdownButton
+            disabled={axesTypeOption==1 ? false : true}
+            title={axesOrientation}
+            id={"btn-axisx"}
+            onSelect={(e) => selectAxesTypeOption(e)}
+          >
+            <Dropdown.Item id={"axeso0"} key={"axeso0"} eventKey={"axeso0"}>
+              Orthogonal
+            </Dropdown.Item>
+            <Dropdown.Item id={"axeso1"} key={"axeso1"} eventKey={"axeso1"}>
+              Parallel
+            </Dropdown.Item>
+            <Dropdown.Item id={"axeso2"} key={"axeso2"} eventKey={"axeso2"}>
+              Radial
+            </Dropdown.Item>
+          </DropdownButton>
+        </div>
+      </div>
+
+      {/* Este bloque va en la fila de abajo */}
+      <div className="configuration dropdown-option" style={{display:"flex", marginTop:"10px"}}>
+        <p> select axis:</p>
+        <DropdownMultiselect
+          id="boxplot-dropdown-menu"
+          name="boxplot-dropdown-menu"
+          className="dropdown-up"
+          options={identifiersOptions} // identifiersOptions to display in the dropdown
+          handleOnChange={onSelect}
+        />
+      </div>
+
+      <svg id={id}></svg>
+    </div>
+  );
+}

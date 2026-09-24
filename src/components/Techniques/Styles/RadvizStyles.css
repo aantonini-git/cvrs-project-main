@@ -1,0 +1,15 @@
+.radviz-circle{
+  stroke-width:0.5;
+  stroke:black;
+  fill:none;
+  
+}
+
+.anchor-point{
+  fill-opacity: 1;
+}
+
+.dropdown{
+  width: 85% !important;
+  margin-left: 5px !important;
+}
